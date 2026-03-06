@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task_list_app
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - task_list
+
+  webserver:
+    image: nginx:latest
+    container_name: task_list_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./nginx:/etc/nginx/conf.d
+    networks:
+      - task_list
+
+  db:
+    image: mysql:8.0
+    container_name: task_list_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: task_list
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - task_list
+
+networks:
+  task_list:
