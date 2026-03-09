@@ -8,6 +8,10 @@
     </head>
     <body>
         <h1>@yield ('title')</h1>
+        <a href="{{ route('tasks.index') }}">Back to tasks</a>
+        <br>
+        <a href="{{ route('tasks.create') }}">Add task</a>
+        <hr>
         <div>
             @if (session()->has('success'))
                 <div>{{ session('success') }}</div>
