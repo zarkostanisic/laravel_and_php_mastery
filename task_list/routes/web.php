@@ -13,8 +13,8 @@ Route::get('/', function (){
 
 Route::get('/tasks', function () {
     $tasks = Task::latest()
-      ->where('completed', true)
-      ->paginate(5);
+    //   ->where('completed', true)
+      ->paginate(10);
 
     return view('index', [
         'tasks' => $tasks
@@ -80,5 +80,13 @@ Route::delete('/tasks/{task}', function (Task $task) {
         ->route('tasks.index')
         ->with('success', 'Task deleted successfully!');
 })->name('tasks.destroy');
+
+Route::put('/tasks/{task}/toggle-complete', function (Task $task) {
+    $task->toggleComplete();
+
+    return redirect()
+        ->back()
+        ->with('success', 'Toggle completed successfully!');
+})->name('tasks.toggle_complete');
 
 
