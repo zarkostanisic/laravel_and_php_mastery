@@ -1,6 +1,7 @@
+version: "3.9"
 
 services:
-
+  # PHP-FPM / App
   app:
     build:
       context: .
@@ -9,11 +10,14 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - .:/var/www
+      - .:/var/www/code:cached       # bind mount samo za kod, cached za brzinu
       - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
     networks:
       - book_review
 
+  # Nginx
   nginx:
     image: nginx:alpine
     container_name: book_review_nginx
@@ -21,13 +25,17 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - .:/var/www
+      - .:/var/www/code:cached
       - ./docker/nginx:/etc/nginx/conf.d
+      - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
     networks:
       - book_review
     depends_on:
       - app
 
+  # MySQL
   mysql:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password
@@ -45,6 +53,7 @@ services:
     networks:
       - book_review
 
+  # Redis
   redis:
     image: redis:alpine
     container_name: book_review_redis
@@ -53,6 +62,8 @@ services:
       - "6379:6379"
     networks:
       - book_review
+
+  # Queue
   queue:
     build:
       context: .
@@ -60,9 +71,13 @@ services:
     container_name: book_review_queue
     command: php artisan queue:work
     volumes:
-      - .:/var/www
+      - .:/var/www/code:cached
+      - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
     depends_on:
       - redis
+      - mysql
     networks:
       - book_review
 
@@ -72,3 +87,5 @@ networks:
 volumes:
   mysql_data:
   vendor_data:
+  storage_data:
+  cache_data:
