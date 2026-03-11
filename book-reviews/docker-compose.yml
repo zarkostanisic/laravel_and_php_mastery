@@ -1,0 +1,74 @@
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: book_reviews_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      - vendor_data:/var/www/vendor
+    networks:
+      - book_reviews
+
+  nginx:
+    image: nginx:alpine
+    container_name: book_reviews_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - book_reviews
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: book_reviews_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: book_reviews
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: book_reviews
+      MYSQL_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - book_reviews
+
+  redis:
+    image: redis:alpine
+    container_name: book_reviews_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - book_reviews
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: book_reviews_queue
+    command: php artisan queue:work
+    volumes:
+      - .:/var/www
+    depends_on:
+      - redis
+    networks:
+      - book_reviews
+
+networks:
+  book_reviews:
+
+volumes:
+  mysql_data:
+  vendor_data:
