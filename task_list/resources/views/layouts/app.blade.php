@@ -33,6 +33,7 @@
         @yield ('styles')
 
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <script src="//unpkg.com/alpinejs" defer></script>
     </head>
     <body class="container mx-auto mt-10 mb-10 max-w-lg">
 
@@ -46,11 +47,24 @@
             class="link">Add task</a>
         </nav>
 
-        <div>
-            @if (session()->has('success'))
-                <div>{{ session('success') }}</div>
-            @endif
-            @yield ('content')
+        <div 
+        class="relative mb-10 rounded border-green-400 bg-green-100 px-4 text-lg text-green-700"
+        x-data="{ flash: true }"
+        role="alert">
+            <span x-show="flash">
+                @if (session()->has('success'))
+                    <strong class="font-bold">Success!</strong>
+                    <div>{{ session('success') }}</div>
+                @endif
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" @click="flash = false"
+                        stroke="currentColor" class="h-6 w-6 cursor-pointer">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </span>
+            </span>
         </div>
+        @yield ('content')
     </body>
 </html>
