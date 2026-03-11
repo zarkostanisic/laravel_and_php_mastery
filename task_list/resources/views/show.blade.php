@@ -3,45 +3,47 @@
 @section ('title', $task->title)
 
 @section ('content')
-    <p>{{ $task->description }}</p>
+    <p  class="mb-4 text-slate-700">{{ $task->description }}</p>
 
     @if ($task->long_description)
-        <p>{{ $task->long_description }}
+        <p  class="mb-4 text-slate-700">{{ $task->long_description }}
     @endif
 
-    @if ($task->completed)
-        <p>Completed</p>
-    @else
-        <p>Not completed</p>
-    @endif
+    <p class="mb-4">
+        @if ($task->completed)
+            <span class="font-medium text-green-500">Completed</span>
+        @else
+            <span class="font-medium text-red-500">Not completed</span>
+        @endif
+    </p>
 
-    <p>{{ $task->created_at }}</p>
-    <p>{{ $task->updated_at }}</p>
+    <p class="mb-4 text-sm text-slate-500">
+        Created {{ $task->created_at->diffForHumans() }} | Updated {{ $task->updated_at->diffForHumans() }}
+    </p>
 
-    <div>
-        <a href="{{ route('tasks.edit', ['task' => $task->id]) }}">Edit</a>
-    </div>
-    <hr>
+    <div class="flex gap-2">
+        <a href="{{ route('tasks.edit', ['task' => $task->id]) }}"
+        class="btn">Edit</a>
 
-    <div>
         <form action="{{ route('tasks.toggle_complete', ['task' => $task->id]) }}" method="POST">
             @csrf
             @method ('PUT')
 
             <div>
-                <button type="submit">{{ $task->completed ? 'Mark as not completed' : 'Mark as completed' }}</button>
+                <button type="submit" class="btn">
+                    {{ $task->completed ? 'Mark as not completed' : 'Mark as completed' }}
+                </button>
             </div>
         </form>
-    </div>
-    <hr>
 
-    <div>
         <form action="{{ route('tasks.destroy', ['task' => $task->id]) }}" method="POST">
             @csrf
             @method ('DELETE')
 
             <div>
-                <button type="submit">Delete task</button>
+                <button type="submit" class="btn">
+                    Delete task
+                </button>
             </div>
         </form>
     </div>
