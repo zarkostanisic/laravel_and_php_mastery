@@ -13,17 +13,16 @@ class BookController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $title = "ss";
-        $books = Book::with('reviews')
-            ->withCount('reviews')
-            ->title($title)
-            ->highestRated('2024-03-18', '2024-03-18')
-            ->minReviews(10)
+        $title = $request->input('title');
+        $from = $request->input('from');
+        $to = $request->input('to');
+
+        $books = Book::when($title, fn($query, $title) => $query->title($title))
             ->get();
 
-        return  BookResource::collection($books);
+        return  view('books.index', ['books' => $books]);
     }
 
     /**
