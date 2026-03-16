@@ -1,7 +1,5 @@
-version: "3.9"
-
 services:
-  # PHP-FPM / App
+
   app:
     build:
       context: .
@@ -10,14 +8,13 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - .:/var/www/code:cached       # bind mount samo za kod, cached za brzinu
+      - .:/var/www:cached
       - vendor_data:/var/www/vendor
       - storage_data:/var/www/storage
       - cache_data:/var/www/bootstrap/cache
     networks:
       - book_review
 
-  # Nginx
   nginx:
     image: nginx:alpine
     container_name: book_review_nginx
@@ -25,35 +22,33 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - .:/var/www/code:cached
+      - .:/var/www:cached
       - ./docker/nginx:/etc/nginx/conf.d
       - vendor_data:/var/www/vendor
       - storage_data:/var/www/storage
       - cache_data:/var/www/bootstrap/cache
-    networks:
-      - book_review
     depends_on:
       - app
+    networks:
+      - book_review
 
-  # MySQL
   mysql:
     image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
     container_name: book_review_mysql
     restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_DATABASE: book_review
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: book_review
       MYSQL_PASSWORD: root
-    volumes:
-      - mysql_data:/var/lib/mysql
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
     networks:
       - book_review
 
-  # Redis
   redis:
     image: redis:alpine
     container_name: book_review_redis
@@ -63,7 +58,6 @@ services:
     networks:
       - book_review
 
-  # Queue
   queue:
     build:
       context: .
@@ -71,11 +65,12 @@ services:
     container_name: book_review_queue
     command: php artisan queue:work
     volumes:
-      - .:/var/www/code:cached
+      - .:/var/www:cached
       - vendor_data:/var/www/vendor
       - storage_data:/var/www/storage
       - cache_data:/var/www/bootstrap/cache
     depends_on:
+      - app
       - redis
       - mysql
     networks:
