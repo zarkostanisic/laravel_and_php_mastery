@@ -9,4 +9,5 @@ Route::resource('books', BookController::class)
     ->only('index', 'show');
 Route::resource('books.reviews', ReviewController::class)
     ->scoped(['review' => 'book'])
-    ->only(['create', 'store']);
+    ->only(['create', 'store'])
+    ->middleware('throttle:reviews');
