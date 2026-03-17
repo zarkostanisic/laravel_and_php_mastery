@@ -32,7 +32,7 @@ class BookController extends Controller
         
         // $books = $books->get();
 
-        $cacheKey = 'booksv2:' . $filter . ':' . $title . ":" . $request->page;
+        $cacheKey = 'booksv3:' . $filter . ':' . $title . ":" . $request->page;
         $books = Cache::remember(
             $cacheKey , 
             3600, 
@@ -65,9 +65,10 @@ class BookController extends Controller
     {
         $cacheKey = 'book:' . $id;
 
-        $book = Cache::remember($cacheKey, 
+        $book = Cache::remember(
+            $cacheKey, 
             3600, 
-            fn($query) => Book::with([
+            fn() => Book::with([
                 'reviews' => fn($query) => $query->latest()
             ])->withAvgRating()->withReviewsCount()->findOrFail($id)
         );
