@@ -1,0 +1,86 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: events_management_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www:cached
+      - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
+    networks:
+      - events_management
+
+  nginx:
+    image: nginx:alpine
+    container_name: events_management_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www:cached
+      - ./docker/nginx:/etc/nginx/conf.d
+      - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
+    depends_on:
+      - app
+    networks:
+      - events_management
+
+  mysql:
+    image: mysql:8.0
+    container_name: events_management_mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: events_management
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: events_management
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - events_management
+
+  redis:
+    image: redis:alpine
+    container_name: events_management_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - events_management
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: events_management_queue
+    command: php artisan queue:work
+    volumes:
+      - .:/var/www:cached
+      - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
+    depends_on:
+      - app
+      - redis
+      - mysql
+    networks:
+      - events_management
+
+networks:
+  events_management:
+
+volumes:
+  mysql_data:
+  vendor_data:
+  storage_data:
+  cache_data:
