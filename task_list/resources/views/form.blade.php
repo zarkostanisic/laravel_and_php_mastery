@@ -46,7 +46,7 @@
             <label for="long_description">Long description</label>
             <textarea name="long_description" rows="10"
             @class(['border-red-500' => $errors->has('long_description')])>
-                {{ isset($task->title) ? $task->description : old('long_description') }}
+                {{ isset($task->description) ? $task->description : old('long_description') }}
             </textarea>
              @error ('long_description')
                 <p class="error">{{ $message }}</p>
