@@ -7,14 +7,19 @@ use Illuminate\Http\Request;
 
 use App\Models\Event;
 
+use App\Http\Resources\EventResource;
+
 class EventController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
-    {
-        return Event::all();
+    {   
+        $events = Event::with(['user'])
+            ->get();
+
+        return EventResource::collection($events);
     }
 
     /**
@@ -34,7 +39,7 @@ class EventController extends Controller
             'user_id' => 1
         ]);
 
-        return $event;
+        return new EventResource($event);
     }
 
     /**
@@ -42,7 +47,9 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        return $event;
+        $event->load('attendees');
+
+        return new EventResource($event);
     }
 
     /**
@@ -61,7 +68,7 @@ class EventController extends Controller
             ...$data
         ]);
 
-        return $event;
+        return new EventResource($event);
     }
 
     /**
