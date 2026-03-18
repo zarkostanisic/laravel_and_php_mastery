@@ -14,7 +14,8 @@ class EventController extends Controller
      */
     public function index()
     {
-        return Event::with(['user', 'attendees', 'attendees.user', 'attendees.event'])->find(1);
+        return Event::with(['user', 'attendees', 'attendees.user', 'attendees.event'])
+            ->get();
     }
 
     /**
@@ -28,9 +29,9 @@ class EventController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Event $event)
     {
-        //
+        return $event;
     }
 
     /**
