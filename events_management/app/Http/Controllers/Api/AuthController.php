@@ -40,4 +40,9 @@ class AuthController extends Controller
             'token' => $token
         ]);
     }
+
+    public function logout(Request $request){
+
+        return auth()->user();
+    }
 }

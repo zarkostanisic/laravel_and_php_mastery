@@ -12,10 +12,24 @@ use App\Models\Attendee;
 
 use App\Http\Traits\CanLoadRelationships;
 
-class AttendeeController extends Controller
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+
+class AttendeeController implements HasMiddleware
 {
     private array $relations = ['user'];
     use CanLoadRelationships;
+
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('auth:sanctum', except: ['index', 'show'])
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -38,7 +52,7 @@ class AttendeeController extends Controller
     public function store(Request $request, Event $event)
     {
         $attendee = $event->attendees()->create([
-            'user_id' => 1
+            'user_id' => $request->user()->id
         ]);
 
         return new AttendeeResource($this->loadRelationships($attendee));
