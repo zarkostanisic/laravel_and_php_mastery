@@ -23,6 +23,7 @@ class EventController extends Controller
     {   
 
         $events = Event::query();
+        
         $this->loadRelationships($events);
 
         $events = $events->latest()
