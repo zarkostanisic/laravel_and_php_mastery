@@ -13,9 +13,13 @@ use App\Http\Traits\CanLoadRelationships;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+use Illuminate\Support\Facades\Gate;
+
 class EventController implements HasMiddleware
 {
-    use CanLoadRelationships;
+    use CanLoadRelationships, AuthorizesRequests;
 
     private array $relations = ['user', 'attendees', 'attendees.user'];
 
@@ -25,7 +29,7 @@ class EventController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('auth:sanctum', except: ['index', 'show'])
+            new Middleware('auth:sanctum', except: ['index'])
         ];
     }
 
@@ -34,7 +38,6 @@ class EventController implements HasMiddleware
      */
     public function index()
     {   
-
         $events = Event::query();
         
         $this->loadRelationships($events);
@@ -50,6 +53,8 @@ class EventController implements HasMiddleware
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Event::class);
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -70,6 +75,8 @@ class EventController implements HasMiddleware
      */
     public function show(Event $event)
     {
+        $this->authorize('view', $event);
+
         $event->load('attendees');
 
         return new EventResource($event);
@@ -80,6 +87,11 @@ class EventController implements HasMiddleware
      */
     public function update(Request $request, Event $event)
     {   
+        // if(!Gate::allows('update-event', $event)){
+        //     abort(403, 'You are not authorized to updata this event.');
+        // }
+        $this->authorize('update-event', $event);
+
         $data = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',

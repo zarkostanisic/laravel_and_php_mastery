@@ -15,10 +15,13 @@ use App\Http\Traits\CanLoadRelationships;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Gate;
+
 class AttendeeController implements HasMiddleware
 {
     private array $relations = ['user'];
-    use CanLoadRelationships;
+    use CanLoadRelationships, AuthorizesRequests;
 
     /**
      * Get the middleware that should be assigned to the controller.
@@ -79,6 +82,8 @@ class AttendeeController implements HasMiddleware
      */
     public function destroy(Event $event, Attendee $attendee)
     {
+        $this->authorize('delete-attendee', [$event, $attendee]);
+
         $attendee->delete();
 
         return response(status: 204);
