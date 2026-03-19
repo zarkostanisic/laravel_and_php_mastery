@@ -9,14 +9,23 @@ use App\Models\Event;
 
 use App\Http\Resources\EventResource;
 
+use App\Http\Traits\CanLoadRelationships;
+
 class EventController extends Controller
 {
+    use CanLoadRelationships;
+
+    private array $relations = ['user', 'attendees', 'attendees.user'];
     /**
      * Display a listing of the resource.
      */
     public function index()
     {   
-        $events = Event::with(['user'])
+
+        $events = Event::query();
+        $this->loadRelationships($events);
+
+        $events = $events->latest()
             ->paginate();
 
         return EventResource::collection($events);
@@ -39,7 +48,7 @@ class EventController extends Controller
             'user_id' => 1
         ]);
 
-        return new EventResource($event);
+        return new EventResource($this->loadRelationships($event));
     }
 
     /**
