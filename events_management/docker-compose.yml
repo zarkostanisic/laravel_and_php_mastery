@@ -48,6 +48,11 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - events_management
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+      timeout: 3s
 
   redis:
     image: redis:alpine
@@ -71,8 +76,8 @@ services:
       - cache_data:/var/www/bootstrap/cache
     depends_on:
       - app
-      - redis
       - mysql
+      - redis
     networks:
       - events_management
 
