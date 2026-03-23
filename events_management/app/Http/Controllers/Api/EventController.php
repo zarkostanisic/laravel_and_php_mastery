@@ -73,9 +73,13 @@ class EventController implements HasMiddleware
     /**
      * Display the specified resource.
      */
-    public function show(Event $event)
+    public function show(Request $request, Event $event)
     {
-        $this->authorize('view', $event);
+        // $this->authorize('view', $event);
+        if($request->user()->cannot('view', $event)){
+            abort(403);
+        }
+
 
         $event->load('attendees');
 
