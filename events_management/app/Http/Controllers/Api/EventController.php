@@ -30,7 +30,7 @@ class EventController implements HasMiddleware
     {
         return [
             new Middleware('auth:sanctum', except: ['index']),
-            new Middleware('throttle:60,1')
+            new Middleware('throttle:api')
         ];
     }
 
