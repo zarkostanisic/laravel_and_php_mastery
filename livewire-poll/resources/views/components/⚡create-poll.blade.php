@@ -5,14 +5,48 @@ use Livewire\Component;
 new class extends Component
 {
     public $title;
+    public $options = ['First'];
+
+    public function mount()
+    {
+        
+    }
+
+    public function addOption()
+    {
+        $this->options[] = '';
+    }
+
+    public function removeOption($index)
+    {
+        unset($this->options[$index]);
+
+        $this->options = array_values($this->options);
+    }
 };
 ?>
 
 <div>
     <form>
-        <label for="title">Poll Title</label>
-        <input type="text" wire:model.live="title"/>
+        <div class="mb-4">
+            <label for="title">Poll Title</label>
+            <input type="text" wire:model.live="title"/>
+        </div>
+        
+        <div class="mb-4">
+            <button class="btn" wire:click.prevent="addOption">Add option</button>
+        </div>
 
-        Current title: {{ $title }}
+        <div>
+        @foreach($options as $index => $option)
+            <div class="mb-4 mt-4">
+                <label>Option {{ $index + 1 }}</label>
+            </div>
+             <div class="flex gap-2">
+                <input type="text" wire:model="options.{{ $index }}"/>
+                <button class="btn" wire:click.prevent="removeOption({{ $index }})">Remove</button>
+            </div>
+        @endforeach
+        </div>
     </form>
 </div>
