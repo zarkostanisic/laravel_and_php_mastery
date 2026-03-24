@@ -1,16 +1,12 @@
 <?php
 
 use Livewire\Component;
+use App\Models\Poll;
 
 new class extends Component
 {
     public $title;
-    public $options = ['First'];
-
-    public function mount()
-    {
-        
-    }
+    public $options = [''];
 
     public function addOption()
     {
@@ -23,11 +19,31 @@ new class extends Component
 
         $this->options = array_values($this->options);
     }
+
+    public function createPoll()
+    {
+        Poll::create([
+            'title' => $this->title
+        ])->options()->createMany(
+                collect($this->options)
+                    ->map(fn($option) => ['name' => $option])
+                    ->all()
+            );
+
+        // foreach($this->options as $optionName){
+        //     $poll->options()
+        //         ->create([
+        //             'name' => $optionName
+        //         ]);
+        // }
+
+        $this->reset(['title', 'options']);
+    }
 };
 ?>
 
 <div>
-    <form>
+    <form wire:submit.prevent="createPoll">
         <div class="mb-4">
             <label for="title">Poll Title</label>
             <input type="text" wire:model.live="title"/>
@@ -47,6 +63,10 @@ new class extends Component
                 <button class="btn" wire:click.prevent="removeOption({{ $index }})">Remove</button>
             </div>
         @endforeach
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn">Create Poll</button>
         </div>
     </form>
 </div>
