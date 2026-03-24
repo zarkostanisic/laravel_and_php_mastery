@@ -57,6 +57,8 @@ new class extends Component
         // }
 
         $this->reset(['title', 'options']);
+
+        $this->dispatch('pollCreated');
     }
 };
 ?>
