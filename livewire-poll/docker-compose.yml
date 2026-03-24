@@ -1,0 +1,91 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: livewire_pool_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www:cached
+      - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
+    networks:
+      - livewire_pool
+
+  nginx:
+    image: nginx:alpine
+    container_name: livewire_pool_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www:cached
+      - ./docker/nginx:/etc/nginx/conf.d
+      - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
+    depends_on:
+      - app
+    networks:
+      - livewire_pool
+
+  mysql:
+    image: mysql:8.0
+    container_name: livewire_pool_mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: livewire_pool
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: livewire_pool
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - livewire_pool
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+      timeout: 3s
+
+  redis:
+    image: redis:alpine
+    container_name: livewire_pool_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - livewire_pool
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: livewire_pool_queue
+    command: php artisan queue:work
+    volumes:
+      - .:/var/www:cached
+      - vendor_data:/var/www/vendor
+      - storage_data:/var/www/storage
+      - cache_data:/var/www/bootstrap/cache
+    depends_on:
+      - app
+      - mysql
+      - redis
+    networks:
+      - livewire_pool
+
+networks:
+  livewire_pool:
+
+volumes:
+  mysql_data:
+  vendor_data:
+  storage_data:
+  cache_data:
